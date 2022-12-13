@@ -6,11 +6,9 @@ import folium
 
 """
     This can be used to check all endpoints of the api are working correctly
-    
-    TODO : Update when I add the remaining CRUD operations to the api
      
 """
-
+# TODO: Update when I add the remaining CRUD operations to the api
 
 class Trails:
     def __init__(self, api_url):
@@ -20,6 +18,10 @@ class Trails:
         return f"The url in this instance is:  {self.url} "
 
     def get_users(self):
+        """
+        Gets all users from TrailService
+        :return:
+        """
         user_url = self.url + '/users'
         print("Getting users from the endpoint: {}".format(user_url))
         res = requests.get(user_url)
@@ -28,6 +30,11 @@ class Trails:
         return json_res
 
     def get_user_by_name(self, username):
+        """
+        Gets a user by username
+        :param username: TrailService user
+        :return: List: JSON response - a list of dicts
+        """
         unique_user_url = self.url + '/users/' + username
         print(unique_user_url)
         res = requests.get(unique_user_url)
@@ -37,6 +44,10 @@ class Trails:
 
 
     def get_trails(self):
+        """
+        Gets all trails from the /trails endpoint
+        :return: list: JSON response dicts
+        """
         trail_url = self.url + '/trails'
         print("Getting trails from the endpoint: {}".format(trail_url))
         res = requests.get(trail_url)
@@ -45,6 +56,10 @@ class Trails:
         return json_res
 
     def get_location_points(self):
+        """
+        Gets all location points for all trails
+        :return: list: JSON response dicts
+        """
         location_url = self.url + '/locationpoints'
         print(location_url)
         res = requests.get(location_url)
@@ -53,6 +68,11 @@ class Trails:
         return json_res
 
     def get_one_trail_points(self, trail_name):
+        """
+        Gets the location points for an individual trail
+        :param trail_name: string: name of trail
+        :return: list: JSON response dicts
+        """
         individual_url = self.url + '/Locationpoints/' + trail_name
         print(individual_url)
         response = requests.get(individual_url)
@@ -61,6 +81,11 @@ class Trails:
         return res_list
 
     def get_lat_and_longs(self, response_list):
+        """
+        Used to get lists of latitudes and longitudes of a trail
+        :param response_list: dicts containing location points
+        :return: lists: lats, longs
+        """
         lats = []
         longs = []
         for d in response_list:
@@ -70,6 +95,11 @@ class Trails:
         return lats, longs
 
     def get_coords(self, response_list):
+        """
+        Gets all latitude and longitudes for a trail and creates points (lat&long)
+        :param response_list: response_list: dicts containing location points
+        :return: list: tuples of latitude and longitude
+        """
         lats = []
         longs = []
         for d in response_list:
@@ -79,6 +109,11 @@ class Trails:
         return coordinates
 
     def get_elevation(self, response_list):
+        """
+        Gets the elevation for each point of a trail
+        :param response_list: response_list: dicts containing location points
+        :return: list: containing all elevations
+        """
         elevations = []
         for d in response_list:
             elevations.append(dict.get(d, 'elevation'))
@@ -86,6 +121,11 @@ class Trails:
 
 
     def get_comments(self, response_list):
+        """
+        Gets all comments from each location point
+        :param response_list: response_list: dicts containing location points
+        :return: list: containing all comment id's
+        """
         all_comments = []
         comment_ids = []
         for d in response_list:
@@ -98,6 +138,12 @@ class Trails:
         return all_comments
 
     def plot_trail(self, returned_points):
+        """
+        Plots a trail (scatter plot) using the latitudes and longitudes
+        Shows elevation as different colours
+        :param returned_points: response_list: dicts containing location points
+        :return: plotly Figure
+        """
         points = returned_points
         ele = getting_trails.get_elevation(points)
         lats, longs = getting_trails.get_lat_and_longs(points)
@@ -115,8 +161,17 @@ class Trails:
                          title=dict.get(points[0], 'trailName'))
         fig.update_layout(xaxis_title="Longitude", yaxis_title="Latitude")
         fig.show()
+        return fig
 
     def create_map (self, response_list):
+        """
+        Creates a map using the coordinates from a trail
+        Can only be used in a jupyter notebook
+        Can be implemented by writing a custom temporary-HTML renderer
+        See: https://github.com/python-visualization/folium/issues/946
+        :param response_list: dicts containing location points
+        :return: folium map
+        """
         m = folium.Map()
         coords = getting_trails.get_coords(response_list)
         for p in coords:
